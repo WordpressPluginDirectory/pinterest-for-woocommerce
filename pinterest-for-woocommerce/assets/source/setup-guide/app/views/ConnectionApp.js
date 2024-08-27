@@ -9,6 +9,7 @@ import { useState, useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import SetupAccount from '../steps/SetupAccount';
+import BillingStatus from '../steps/BillingStatus';
 import ClaimWebsite from '../steps/ClaimWebsite';
 import SetupTracking from '../steps/SetupTracking';
 import SaveSettingsButton from '../components/SaveSettingsButton';
@@ -46,7 +47,7 @@ const SettingsApp = () => {
 	useCreateNotice()( wcSettings.pinterest_for_woocommerce.error );
 
 	return (
-		<>
+		<div className="pinterest-for-woocommerce-connection">
 			<HealthCheck />
 			<NavigationClassic />
 
@@ -58,7 +59,7 @@ const SettingsApp = () => {
 						isConnected={ isConnected }
 						isBusinessConnected={ isBusinessConnected }
 					/>
-
+					<BillingStatus />
 					{ isGroup1Visible && (
 						<ClaimWebsite view={ SETTINGS_VIEW } />
 					) }
@@ -72,7 +73,7 @@ const SettingsApp = () => {
 			) : (
 				<Spinner />
 			) }
-		</>
+		</div>
 	);
 };
 

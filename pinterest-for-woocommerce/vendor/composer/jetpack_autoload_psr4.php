@@ -11,8 +11,12 @@ return array(
 		'path'    => array( $vendorDir . '/defuse/php-encryption/src' )
 	),
 	'Automattic\\WooCommerce\\Pinterest\\' => array(
-		'version' => 'dev-release/1.3.25',
+		'version' => 'dev-release/1.4.7',
 		'path'    => array( $baseDir . '/src' )
+	),
+	'Automattic\\WooCommerce\\Grow\\Tools\\CompatChecker\\v0_0_1\\' => array(
+		'version' => 'dev-compat-checker',
+		'path'    => array( $vendorDir . '/woocommerce/grow/src' )
 	),
 	'Automattic\\WooCommerce\\ActionSchedulerJobFramework\\' => array(
 		'version' => '2.0.0.0',

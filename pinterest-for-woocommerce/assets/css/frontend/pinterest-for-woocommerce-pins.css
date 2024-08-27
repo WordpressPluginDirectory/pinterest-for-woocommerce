@@ -17,4 +17,8 @@
     .wc-block-grid__product:hover > .pinterest-for-woocommerce-image-wrapper a {
       text-decoration: none; }
 
+.wp-block-post.product,
+.wc-block-product.product {
+  position: relative; }
+
 /*# sourceMappingURL=../../source/_maps/css/frontend/pinterest-for-woocommerce-pins.css.map */

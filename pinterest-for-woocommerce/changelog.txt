@@ -1,10 +1,63 @@
 *** Pinterest for WooCommerce Changelog ***
 
-= 1.3.25 - 2024-07-23 =
-* Fix - Add regenerator-runtime as script dependency for WP 6.6.
-* Fix - Checkbox control UI issue for WP 6.6.
+= 1.4.7 - 2024-08-26 =
+* Add - Adding admin notice in case of feed deletion error.
+* Add - Call to disconnect from Pinterest on deactivation.
+* Dev - Fixing SKU Unit tests.
+* Fix - Pagination on Feed Issues table.
+* Fix - Pinterest Save button positioning.
+* Fix - Reset internal feed status on disconnect.
+* Tweak - New .pot file.
+
+= 1.4.6 - 2024-08-13 =
+* Dev - Update dependency.
+* Tweak - Add the website's domain to the Pinterest feed name.
+* Tweak - WC 9.2 compatibility.
+
+= 1.4.5 - 2024-07-19 =
+* Tweak - replace locale source function.
+
+= 1.4.4 - 2024-07-10 =
+* Add - Billing status info in the Settings UI
+* Fix - Token invalid reset procedure
+* Fix - Checkbox control UI with WordPress 6.6
 * Tweak - WC 9.1 compatibility.
 * Tweak - WP 6.6 compatibility.
+
+= 1.4.3 - 2024-06-25 =
+* Tweak - Remove `feature_flag` connection info data key.
+* Update - Disabling CAPI tracker.
+
+= 1.4.2 - 2024-06-13 =
+* Add - Versioning and compatibility checks to implement support policy.
+* Fix - Release v1.4.1.
+* Fix - Undefined array key "path" warning thrown by DomainVerification.php.
+* Tweak - Adds WooCommerce as a dependency to the plugin header.
+* Tweak - Revert to WooCommerce.com domain.
+
+= 1.4.1 - 2024-05-01 =
+* Add - Heartbeat actions cleanup
+* Update - Mandatory condition on tracking
+* Update - pinit.js script import to match with Pinterest documentation
+* Update - Error cases handling for discounts
+* Tweak - Advertiser ID missing exception
+* Fix - Missing Order ID into custom_data array for Checkout CAPI event.
+* Fix - Fix tooltip UI issue in Settings page
+* Fix - Correct coupons information
+
+= 1.4.0 - 2024-04-02 =
+* Add - CAPI: A new conversion system for reporting from the plugin to Pinterest.
+* Add - Support for platforms using persistent object caches like Memcached.
+* Add - Automatic token exchange and refresh token handling for improved OAuth management.
+* Add - Twenty Twenty-Four theme support.
+* Update - API update to V5.
+* Update - Tag implementation updated to work in conjunction with CAPI.
+* Update - Logging system enhanced for more granular debugging.
+* Update - Caching enabled on feed status endpoints for improved performance.
+* Update - Redirect to the cart page after successful addition WooCommerce setting support.
+* Update - Plugin deactivation and uninstall behavior now properly implemented.
+* Tweak - Multiple smaller adjustments for improved stability and performance.
+* Dev - Plugin now uses the new middleware for connection.
 
 = 1.3.24 - 2024-04-01 =
 * Tweak - WC 8.8 compatibility.

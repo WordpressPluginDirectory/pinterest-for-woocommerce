@@ -5,28 +5,29 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              https://woo.com
+ * @link              https://woocommerce.com
  * @since             1.0.0
  * @package           woocommerce/pinterest-for-woocommerce
  *
  * @wordpress-plugin
  * Plugin Name:       Pinterest for WooCommerce
- * Plugin URI:        https://woo.com/products/pinterest-for-woocommerce/
+ * Plugin URI:        https://woocommerce.com/products/pinterest-for-woocommerce/
  * Description:       Grow your business on Pinterest! Use this official plugin to allow shoppers to Pin products while browsing your store, track conversions, and advertise on Pinterest.
- * Version:           1.3.25
+ * Version:           1.4.7
  * Author:            WooCommerce
- * Author URI:        https://woo.com
+ * Author URI:        https://woocommerce.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       pinterest-for-woocommerce
  * Domain Path:       /i18n/languages
+ * Requires Plugins:  woocommerce
  *
  * Requires at least: 5.6
  * Tested up to: 6.6
  * Requires PHP: 7.4
  *
  * WC requires at least: 6.3
- * WC tested up to: 9.1
+ * WC tested up to: 9.2
  */
 
 /**
@@ -46,12 +47,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'PINTEREST_FOR_WOOCOMMERCE_PLUGIN_FILE', __FILE__ );
-define( 'PINTEREST_FOR_WOOCOMMERCE_VERSION', '1.3.25' ); // WRCS: DEFINED_VERSION.
+define( 'PINTEREST_FOR_WOOCOMMERCE_VERSION', '1.4.7' ); // WRCS: DEFINED_VERSION.
 
 // HPOS compatibility declaration.
 add_action(
 	'before_woocommerce_init',
-	function() {
+	function () {
 		if ( class_exists( FeaturesUtil::class ) ) {
 			FeaturesUtil::declare_compatibility( 'custom_order_tables', plugin_basename( __FILE__ ) );
 			FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', plugin_basename( __FILE__ ) );
@@ -88,7 +89,7 @@ if ( is_readable( $autoloader ) ) {
 	 */
 	add_action(
 		'admin_notices',
-		function() {
+		function () {
 			?>
 			<div class="notice notice-error">
 				<p>
@@ -138,6 +139,8 @@ register_deactivation_hook(
 	PINTEREST_FOR_WOOCOMMERCE_PLUGIN_FILE,
 	function () {
 		Automattic\WooCommerce\Pinterest\ProductSync::cancel_jobs();
+		Automattic\WooCommerce\Pinterest\Heartbeat::cancel_jobs();
+		Pinterest_For_Woocommerce::disconnect();
 	}
 );
 
@@ -147,6 +150,8 @@ if ( defined( 'WC_PLUGIN_FILE' ) ) {
 		WC_PLUGIN_FILE,
 		function () {
 			Automattic\WooCommerce\Pinterest\ProductSync::cancel_jobs();
+			Automattic\WooCommerce\Pinterest\Heartbeat::cancel_jobs();
+			Pinterest_For_Woocommerce::disconnect();
 		}
 	);
 }

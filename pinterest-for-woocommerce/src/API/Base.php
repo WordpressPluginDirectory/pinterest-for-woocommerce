@@ -9,10 +9,9 @@
 
 namespace Automattic\WooCommerce\Pinterest\API;
 
-use Automattic\WooCommerce\Pinterest as Pinterest;
 use Automattic\WooCommerce\Pinterest\Logger as Logger;
-use Automattic\WooCommerce\Pinterest\PinterestApiException as ApiException;
-use \Exception;
+use Automattic\WooCommerce\Pinterest\PinterestApiException;
+use Exception;
 
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -77,51 +76,27 @@ class Base {
 	 *
 	 * @return array
 	 *
-	 * @throws ApiException PHP exception.
-	 * @throws Exception    PHP exception.
+	 * @throws PinterestApiException Pinterest API exception in case of API error in response.
 	 */
 	public static function make_request( $endpoint, $method = 'POST', $payload = array(), $api = '', $cache_expiry = false ) {
-
-		$api         = empty( $api ) ? '' : trailingslashit( $api );
-		$api_version = 'ads/' === $api ? self::API_ADS_VERSION : self::API_VERSION;
-
+		$api = empty( $api ) ? '' : trailingslashit( $api );
 		if ( ! empty( $cache_expiry ) ) {
 			$cache = self::get_cached_response( $endpoint, $method, $payload, $api );
-
 			if ( $cache ) {
 				return $cache;
 			}
 		}
 
-		$request = array(
-			'url'     => self::API_DOMAIN . "/{$api}v{$api_version}/{$endpoint}",
-			'method'  => $method,
-			'args'    => $payload,
-			'headers' => array(
-				'Pinterest-Woocommerce-Version' => PINTEREST_FOR_WOOCOMMERCE_VERSION,
-			),
-		);
-
-		if ( 'ads/' === $api && in_array( $method, array( 'POST', 'PATCH' ), true ) ) {
-			// Force json content-type header and json encode payload.
-			$request['headers']['Content-Type'] = 'application/json';
-
-			$request['args'] = wp_json_encode( $payload );
-		}
-
+		$request = static::prepare_request( $endpoint, $method, $payload, $api );
 		try {
-
-			$response = self::handle_request( $request );
-			self::maybe_cache_api_response( $endpoint, $method, $payload, $api, $response, $cache_expiry );
+			$response = static::handle_request( $request );
+			static::maybe_cache_api_response( $endpoint, $method, $payload, $api, $response, $cache_expiry );
 			return $response;
-
-		} catch ( ApiException $e ) {
-
+		} catch ( PinterestApiException $e ) {
 			if ( ! empty( Pinterest_For_WooCommerce()::get_setting( 'enable_debug_logging' ) ) ) {
 				/* Translators: 1: Error message 2: Stack trace */
 				Logger::log( sprintf( "%1\$s\n%2\$s", $e->getMessage(), $e->getTraceAsString() ), 'error' );
 			} else {
-
 				Logger::log(
 					sprintf(
 						/* Translators: 1: Request method 2: Request endpoint 3: Response status code 4: Response message 5: Pinterest code */
@@ -136,30 +111,59 @@ class Base {
 				);
 			}
 
-			throw $e;
-		} catch ( Exception $e ) {
-
-			if ( ! empty( Pinterest_For_WooCommerce()::get_setting( 'enable_debug_logging' ) ) ) {
-				/* Translators: 1: Error message 2: Stack trace */
-				Logger::log( sprintf( "%1\$s\n%2\$s", $e->getMessage(), $e->getTraceAsString() ), 'error' );
-			} else {
-
-				Logger::log(
-					sprintf(
-						/* Translators: 1: Request method 2: Request endpoint 3: Response status code 4: Response message */
-						esc_html__( "%1\$s Request: %2\$s\nStatus Code: %3\$s\nAPI response: %4\$s", 'pinterest-for-woocommerce' ),
-						$method,
-						$request['url'],
-						$e->getCode(),
-						$e->getMessage(),
-					),
-					'error'
-				);
+			/**
+			 * Filter to disconnect the merchant from the Pinterest platform on authentication failure.
+			 *
+			 * @since 1.4.4
+			 */
+			$do_disconnect = apply_filters(
+				'pinterest_for_woocommerce_disconnect_on_authentication_failure',
+				'__return_true'
+			);
+			if ( in_array( $e->getCode(), array( 401, 403 ) ) && $do_disconnect ) {
+				/**
+				 * Actions to perform disconnecting the merchant from the Pinterest platform.
+				 *
+				 * @since 1.4.0
+				 */
+				do_action( 'pinterest_for_woocommerce_disconnect' );
 			}
 
 			throw $e;
 		}
+	}
 
+	/**
+	 * Prepare request
+	 *
+	 * @param string $endpoint        the endpoint to perform the request on.
+	 * @param string $method          eg, POST, GET, PUT etc.
+	 * @param array  $payload         Payload to be sent on the request's body.
+	 * @param string $api             The specific Endpoints subset.
+	 *
+	 * @return array
+	 */
+	public static function prepare_request( $endpoint, $method = 'POST', $payload = array(), $api = '' ) {
+		$api         = empty( $api ) ? '' : trailingslashit( $api );
+		$api_version = 'ads/' === $api ? self::API_ADS_VERSION : self::API_VERSION;
+
+		$request = array(
+			'url'     => static::API_DOMAIN . "/{$api}v{$api_version}/{$endpoint}",
+			'method'  => $method,
+			'args'    => $payload,
+			'headers' => array(
+				'Pinterest-Woocommerce-Version' => PINTEREST_FOR_WOOCOMMERCE_VERSION,
+			),
+		);
+
+		if ( 'ads/' === $api && in_array( $method, array( 'POST', 'PATCH' ), true ) ) {
+			// Force json content-type header and json encode payload.
+			$request['headers']['Content-Type'] = 'application/json';
+
+			$request['args'] = wp_json_encode( $payload );
+		}
+
+		return $request;
 	}
 
 	/**
@@ -222,11 +226,11 @@ class Base {
 	 * @param array  $payload  Request payload.
 	 * @param string $api      Request API.
 	 *
-	 * @return void
+	 * @return bool True if the transient was deleted, false otherwise.
 	 */
-	public static function invalidate_cached_response( $endpoint, $method, $payload, $api ) {
+	public static function invalidate_cached_response( $endpoint, $method, $payload, $api ): bool {
 		$cache_key = self::get_cache_key( $endpoint, $method, $payload, $api );
-		delete_transient( $cache_key );
+		return delete_transient( $cache_key );
 	}
 
 	/**
@@ -246,10 +250,9 @@ class Base {
 	 *
 	 * @return array
 	 *
-	 * @throws Exception PHP exception.
-	 * @throws ApiException PHP exception.
+	 * @throws PinterestApiException Pinterest API exception in case of API error during response or problems with request.
 	 */
-	public static function handle_request( $request ) {
+	protected static function handle_request( $request ) {
 
 		$request = wp_parse_args(
 			$request,
@@ -261,63 +264,46 @@ class Base {
 			)
 		);
 
-		$body = '';
+		if ( $request['auth_header'] ) {
+			$request['headers']['Authorization'] = 'Bearer ' . static::get_token()['access_token'];
+		}
+
+		$request_args = array(
+			'method'    => $request['method'],
+			'headers'   => $request['headers'],
+			'sslverify' => false,
+			'body'      => $request['args'],
+			'timeout'   => 15,
+		);
+
+		Logger::log_request( $request['url'], $request_args );
+		$response = wp_remote_request( $request['url'], $request_args );
+		Logger::log_response( $response );
+
+		if ( is_wp_error( $response ) ) {
+			$error_message = ( is_wp_error( $response ) ) ? $response->get_error_message() : $response['body'];
+			throw new PinterestApiException( esc_html( $error_message ), 1 );
+		}
 
 		try {
-
-			self::get_token();
-
-			if ( $request['auth_header'] ) {
-				$request['headers']['Authorization'] = 'Bearer ' . self::$token['access_token'];
-			}
-
-			$request_args = array(
-				'method'    => $request['method'],
-				'headers'   => $request['headers'],
-				'sslverify' => false,
-				'body'      => $request['args'],
-				'timeout'   => 15,
-			);
-
-			// Log request.
-			Logger::log_request( $request['url'], $request_args, 'debug' );
-
-			$response = wp_remote_request( $request['url'], $request_args );
-
-			if ( is_wp_error( $response ) ) {
-				$error_message = ( is_wp_error( $response ) ) ? $response->get_error_message() : $response['body'];
-
-				throw new Exception( $error_message, 1 );
-			}
-
-			// Log response.
-			Logger::log_response( $response, 'debug' );
-
 			$body = self::parse_response( $response );
-
 		} catch ( Exception $e ) {
-
-			throw new Exception( $e->getMessage(), $e->getCode() );
+			throw new PinterestApiException(
+				sprintf(
+					/* translators: Empty error body exception. */
+					esc_html__( 'Response body processing error: $1%s', 'pinterest-for-woocommerce' ),
+					esc_html( $e->getMessage() )
+				),
+				(int) $e->getCode()
+			);
 		}
 
 		$response_code = absint( wp_remote_retrieve_response_code( $response ) );
 
-		if ( 401 === $response_code ) {
-			throw new Exception( __( 'Reconnect to your Pinterest account', 'pinterest-for-woocommerce' ), 401 );
-		}
-
 		if ( ! in_array( absint( $response_code ), array( 200, 201, 204 ), true ) ) {
-
-			$message = '';
-			if ( ! empty( $body['message'] ) ) {
-				$message = $body['message'];
-			}
-			if ( ! empty( $body['error_description'] ) ) {
-				$message = $body['error_description'];
-			}
-
-			/* Translators: Additional message */
-			throw new ApiException(
+			$message = $body['message'] ?? $body['error_description'] ?? '';
+			/* translators: Additional message */
+			throw new PinterestApiException(
 				array(
 					'message'       => $message,
 					'response_body' => $body,
@@ -325,7 +311,6 @@ class Base {
 				$response_code
 			);
 		}
-
 		return $body;
 	}
 
@@ -337,7 +322,7 @@ class Base {
 	 */
 	public static function get_token() {
 		if ( is_null( self::$token ) ) {
-			self::$token = Pinterest_For_Woocommerce()::get_token();
+			self::$token = Pinterest_For_Woocommerce()::get_access_token();
 		}
 
 		return self::$token;
@@ -361,7 +346,7 @@ class Base {
 			throw new Exception( __( 'Empty body', 'pinterest-for-woocommerce' ), 204 );
 		}
 
-		return (array) json_decode( $response['body'] );
+		return json_decode( $response['body'], true );
 	}
 
 
@@ -413,9 +398,7 @@ class Base {
 	/**
 	 * Get the linked business accounts from the API.
 	 *
-	 * @return array
-	 *
-	 * @throws ApiException|Exception Pinterest API or PHP exceptions.
+	 * @return mixed
 	 */
 	public static function get_linked_businesses() {
 		return self::make_request( 'users/me/businesses', 'GET' );
@@ -535,10 +518,8 @@ class Base {
 	 * @return mixed
 	 */
 	public static function create_tag( $advertiser_id ) {
-		/**
-		 * Tag name.
-		 */
-		$tag_name = apply_filters( 'pinterest_for_woocommerce_default_tag_name', esc_html__( 'Auto-created by Pinterest for WooCommerce', 'pinterest-for-woocommerce' ) );
+
+		$tag_name = static::get_tag_name();
 
 		return self::make_request(
 			"advertisers/{$advertiser_id}/conversion_tags",
@@ -647,12 +628,13 @@ class Base {
 	 *
 	 * @since 1.2.13
 	 *
-	 * @param string $merchant_id     The merchant ID the feed belongs to.
+	 * @param string $merchant_id The merchant ID the feed belongs to.
 	 * @param string $feed_profile_id The ID of the feed to be disabled.
 	 *
 	 * @return mixed
+	 * @throws PinterestApiException If the API request fails with other than 2xx status code.
 	 */
-	public static function disable_merchant_feed( $merchant_id, $feed_profile_id ) {
+	public static function disable_merchant_feed( $merchant_id, $feed_profile_id ): array {
 		return self::make_request(
 			"catalogs/disable_feed_profile/{$merchant_id}/{$feed_profile_id}/"
 		);
@@ -663,12 +645,13 @@ class Base {
 	 *
 	 * @since 1.2.13
 	 *
-	 * @param string $merchant_id     The merchant ID the feed belongs to.
+	 * @param string $merchant_id The merchant ID the feed belongs to.
 	 * @param string $feed_profile_id The ID of the feed to be enabled.
 	 *
 	 * @return mixed
+	 * @throws PinterestApiException If the API request fails with other than 2xx status code.
 	 */
-	public static function enable_merchant_feed( $merchant_id, $feed_profile_id ) {
+	public static function enable_merchant_feed( $merchant_id, $feed_profile_id ): array {
 		return self::make_request(
 			"catalogs/enable_feed_profile/{$merchant_id}/{$feed_profile_id}/"
 		);
@@ -727,9 +710,10 @@ class Base {
 	 * Get a specific merchant's feed report using the given arguments.
 	 *
 	 * @param string $merchant_id The merchant ID the feed belongs to.
-	 * @param string $feed_id     The ID of the feed.
+	 * @param string $feed_id The ID of the feed.
 	 *
 	 * @return mixed
+	 * @throws PinterestApiException If the API request fails with other than 2xx status code.
 	 */
 	public static function get_merchant_feed_report( $merchant_id, $feed_id ) {
 		return self::make_request(
@@ -777,32 +761,6 @@ class Base {
 	}
 
 	/**
-	 * Redeem advertisement offer code ( ads credit ).
-	 *
-	 * @param string $advertiser_id The advertiser id for which we redeem the offer code.
-	 * @param string $offer_code Promotional ads credit offer code.
-	 *
-	 * @return mixed
-	 */
-	public static function redeem_ads_offer_code( $advertiser_id, $offer_code ) {
-		$request_url = "advertisers/{$advertiser_id}/marketing_offer/{$offer_code}/redeem?is_encoded=true";
-		return self::make_request( $request_url, 'POST', array(), 'ads' );
-	}
-
-	/**
-	 * Validate advertisement offer code ( ads credit ).
-	 *
-	 * @param string $advertiser_id The advertiser id for which we validate the offer code.
-	 * @param string $offer_code Promotional ads credit offer code.
-	 *
-	 * @return mixed
-	 */
-	public static function validate_ads_offer_code( $advertiser_id, $offer_code ) {
-		$url = "advertisers/{$advertiser_id}/marketing_offer/{$offer_code}/redeem?validate_only=true";
-		return self::make_request( $url, 'POST', array(), 'ads' );
-	}
-
-	/**
 	 * Pull information about available ads credits for advertiser.
 	 *
 	 * @param string $advertiser_id The advertiser id for which we check the available ads credits.
@@ -826,5 +784,26 @@ class Base {
 	public static function get_list_of_ads_supported_countries() {
 		$request_url = 'advertisers/countries';
 		return self::make_request( $request_url, 'GET', array(), 'ads', 2 * DAY_IN_SECONDS );
+	}
+
+	/**
+	 * Generates a tag name.
+	 *
+	 * @since 1.4.0
+	 *
+	 * @return string The tag name.
+	 */
+	protected static function get_tag_name(): string {
+		/**
+		 * Filters the default tag name.
+		 *
+		 * @since Unknown
+		 *
+		 * @param string $tag_name The default tag name.
+		 */
+		return apply_filters(
+			'pinterest_for_woocommerce_default_tag_name',
+			esc_html__( 'Auto-created by Pinterest for WooCommerce', 'pinterest-for-woocommerce' )
+		);
 	}
 }
