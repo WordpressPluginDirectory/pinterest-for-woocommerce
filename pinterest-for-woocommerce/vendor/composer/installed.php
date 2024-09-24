@@ -3,7 +3,7 @@
         'name' => 'woocommerce/pinterest-for-woocommerce',
         'pretty_version' => 'dev-develop',
         'version' => 'dev-develop',
-        'reference' => '3b4d4c0e2e938530dc62128beeb49e85c36036e6',
+        'reference' => 'eaa82308ac92a6c8f26b5b6abbeb1181187a5663',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -49,7 +49,7 @@
         'woocommerce/grow' => array(
             'pretty_version' => 'dev-compat-checker',
             'version' => 'dev-compat-checker',
-            'reference' => '6be1d45dec71c31ab6b118c9d359d141f16a6aae',
+            'reference' => 'cfb01a73eb6207e00ba375fefc707c1e12f8cd4e',
             'type' => 'library',
             'install_path' => __DIR__ . '/../woocommerce/grow',
             'aliases' => array(),
@@ -58,7 +58,7 @@
         'woocommerce/pinterest-for-woocommerce' => array(
             'pretty_version' => 'dev-develop',
             'version' => 'dev-develop',
-            'reference' => '3b4d4c0e2e938530dc62128beeb49e85c36036e6',
+            'reference' => 'eaa82308ac92a6c8f26b5b6abbeb1181187a5663',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
