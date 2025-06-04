@@ -2,9 +2,9 @@
 Contributors: automattic, pinterest, woocommerce
 Tags: pinterest, woocommerce, marketing, product catalog feed, pixel
 Requires at least: 5.6
-Tested up to: 6.7
+Tested up to: 6.8
 Requires PHP: 7.3
-Stable tag: 1.4.15
+Stable tag: 1.4.20
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -90,6 +90,28 @@ Yes you can! Join in on our [GitHub repository](https://github.com/woocommerce/p
 Release and roadmap notes available on the [WooCommerce Developers Blog](https://developer.woocommerce.com/)
 
 == Changelog ==
+
+= 1.4.20 - 2025-06-03 =
+* Tweak - Reenable WP Consent API tracking integration.
+
+= 1.4.19 - 2025-05-29 =
+* Add CAPI enablement modal to encourage merchants to enable Conversions API.
+* Enable Conversions API in OAuth flow and settings UI.
+
+= 1.4.18 - 2025-05-20 =
+* Tweak - WC 9.9 compatibility.
+* Tweak - WP 6.8 compatibility.
+
+= 1.4.17 - 2025-03-18 =
+* Add - PHP 8.4 compatibility.
+* Fix - Add feed status data fallback to empty data sets.
+* Fix - Site locale is obtained from settings.
+* Tweak - WC 9.8 compatibility.
+
+= 1.4.16 - 2025-02-11 =
+* Add - UTM parameters to the products URLs used in the product feed.
+* Dev - Updating code styling rules.
+* Tweak - WC 9.7 compatibility.
 
 = 1.4.15 - 2025-01-21 =
 * Tweak - WC 9.6 compatibility.
