@@ -2,9 +2,9 @@
 Contributors: automattic, pinterest, woocommerce
 Tags: pinterest, woocommerce, marketing, product catalog feed, pixel
 Requires at least: 5.6
-Tested up to: 6.8
+Tested up to: 6.9
 Requires PHP: 7.3
-Stable tag: 1.4.21
+Stable tag: 1.4.23
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -91,6 +91,17 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 == Changelog ==
 
+= 1.4.23 - 2025-11-24 =
+* Fix - Remove feed file on deactivation.
+* Tweak - WC 10.4 compatibility.
+* Tweak - WP 6.9 compatibility.
+
+= 1.4.22 - 2025-10-28 =
+* Fix - Issue where `product_type` include more then 5 categories if a product included more.
+* Tweak - Update use of `wp_json_encode` to avoid potential browser parsing issues.
+* Tweak - WC 10.3 compatibility.
+* Tweak - WP 6.8 compatibility.
+
 = 1.4.21 - 2025-06-16 =
 * Update WP Consent API to affect all tracking with improved architecture.
 * [dev] Pin Github actions to immutable references of commits instead of tags.
@@ -104,7 +115,6 @@ Release and roadmap notes available on the [WooCommerce Developers Blog](https:/
 
 = 1.4.18 - 2025-05-20 =
 * Tweak - WC 9.9 compatibility.
-* Tweak - WP 6.8 compatibility.
 
 = 1.4.17 - 2025-03-18 =
 * Add - PHP 8.4 compatibility.
