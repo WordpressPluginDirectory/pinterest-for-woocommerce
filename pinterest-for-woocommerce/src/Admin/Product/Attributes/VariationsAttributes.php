@@ -19,6 +19,9 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Class VariationsAttributes
+ *
+ * @class   VariationsAttributes
+ * @version 1.5.2
  */
 class VariationsAttributes {
 
@@ -30,7 +33,7 @@ class VariationsAttributes {
 	protected $admin;
 
 	/**
-	 * Attibute Manager.
+	 * Attribute Manager.
 	 *
 	 * @var AttributeManager
 	 */

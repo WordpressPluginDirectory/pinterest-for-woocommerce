@@ -11,11 +11,19 @@ return array(
 		'path'    => $vendorDir . '/automattic/jetpack-autoloader/src/AutoloadGenerator.php'
 	),
 	'Automattic\\Jetpack\\Device_Detection' => array(
-		'version' => '3.4.2.0',
+		'version' => '3.4.6.0',
 		'path'    => $vendorDir . '/automattic/jetpack-device-detection/src/class-device-detection.php'
 	),
 	'Automattic\\Jetpack\\Device_Detection\\User_Agent_Info' => array(
-		'version' => '3.4.2.0',
+		'version' => '3.4.6.0',
 		'path'    => $vendorDir . '/automattic/jetpack-device-detection/src/class-user-agent-info.php'
+	),
+	'SomewhereWarm\\Changelogger\\Changelog_Entry' => array(
+		'version' => 'dev-trunk',
+		'path'    => $baseDir . '/tools/changelogger/class-changelog-entry.php'
+	),
+	'SomewhereWarm\\Changelogger\\Changelog_Formatter' => array(
+		'version' => 'dev-trunk',
+		'path'    => $baseDir . '/tools/changelogger/class-changelog-formatter.php'
 	),
 );

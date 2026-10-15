@@ -18,21 +18,23 @@ use \WC_Shipping_Zone;
  * By extending WC_Shipping_Zone we are able to add functionality necessary for Pinterest shipping column generation.
  * This allows us to operate on familiar interface which will be useful when we will continue to expand the functionality.
  *
- * @since 1.0.5
+ * @class   PinterestShippingZone
+ * @since   1.0.5
+ * @version 1.5.2
  */
 class PinterestShippingZone extends WC_Shipping_Zone {
 
 	/**
 	 * Caching for internal structure of locations.
 	 *
-	 * @var $zone_countries_with_states
+	 * @var array|null
 	 */
 	private $zone_countries_with_states = null;
 
 	/**
 	 * Caching for supported shipping methods.
 	 *
-	 * @var $zone_countries_with_states
+	 * @var array|null
 	 */
 	private $supported_shipping_methods = null;
 
@@ -203,7 +205,7 @@ class PinterestShippingZone extends WC_Shipping_Zone {
 	 *
 	 * @since 1.0.5
 	 *
-	 * @param WC_Shipping_Method $shipping_method Shipping rate to verify.
+	 * @param \WC_Shipping_Method $shipping_method Shipping rate to verify.
 	 * @return boolean
 	 */
 	private function is_shipping_method_supported( $shipping_method ) {

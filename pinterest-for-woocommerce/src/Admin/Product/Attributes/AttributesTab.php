@@ -17,6 +17,9 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Class AttributesTab
+ *
+ * @class   AttributesTab
+ * @version 1.5.2
  */
 class AttributesTab {
 
@@ -49,23 +52,15 @@ class AttributesTab {
 	 */
 	public function register(): void {
 		add_action(
-			'woocommerce_new_product',
-			function ( int $product_id, WC_Product $product ) {
-				$this->handle_update_product( $product );
-			},
-			10,
-			2
-		);
-		add_action(
-			'woocommerce_update_product',
-			function ( int $product_id, WC_Product $product ) {
-				$this->handle_update_product( $product );
-			},
-			10,
-			2
+			'woocommerce_admin_process_product_object',
+			function ( $product ) {
+				if ( $product instanceof WC_Product ) {
+					$this->handle_update_product( $product );
+				}
+			}
 		);
 
-		add_action(
+		add_filter(
 			'woocommerce_product_data_tabs',
 			function ( array $tabs ) {
 				return $this->add_tab( $tabs );
@@ -133,6 +128,12 @@ class AttributesTab {
 	 * @param WC_Product $product WooCommerce product.
 	 */
 	private function handle_update_product( WC_Product $product ) {
+		if ( ! isset( $_POST['woocommerce_meta_nonce'] ) || ! is_string( $_POST['woocommerce_meta_nonce'] )
+			|| ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['woocommerce_meta_nonce'] ) ), 'woocommerce_save_data' )
+			|| ! current_user_can( 'edit_post', $product->get_id() ) ) {
+			return;
+		}
+
 		/**
 		 * Array of `true` values for each product IDs already handled by this method. Used to prevent double submission.
 		 *
@@ -146,13 +147,11 @@ class AttributesTab {
 		$form           = $this->get_form( $product );
 		$form_view_data = $form->get_view_data();
 
-		// phpcs:disable WordPress.Security.NonceVerification
 		if ( empty( $_POST[ $form_view_data['name'] ] ) ) {
 			return;
 		}
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$submitted_data = (array) wc_clean( wp_unslash( $_POST[ $form_view_data['name'] ] ) );
-		// phpcs:enable WordPress.Security.NonceVerification
 
 		$form->submit( $submitted_data );
 		$this->update_data( $product, $form->get_data() );

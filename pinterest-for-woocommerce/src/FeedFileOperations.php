@@ -16,6 +16,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Class which handles all feed file filesystem operations.
+ *
+ * @class   FeedFileOperations
+ * @version 1.5.0
  */
 class FeedFileOperations {
 
@@ -67,6 +70,20 @@ class FeedFileOperations {
 			);
 
 			$this->check_write_for_io_errors( $bytes_written, $config['tmp_file'] );
+		}
+	}
+
+	/**
+	 * Delete the temporary feed files.
+	 * Used when a generation cycle fails or is aborted, so partial feeds do not accumulate on disk.
+	 *
+	 * @since 1.5.0
+	 */
+	public function delete_temporary_feed_files(): void {
+		foreach ( $this->configurations->get_configurations() as $config ) {
+			if ( isset( $config['tmp_file'] ) && file_exists( $config['tmp_file'] ) ) {
+				wp_delete_file( $config['tmp_file'] );
+			}
 		}
 	}
 

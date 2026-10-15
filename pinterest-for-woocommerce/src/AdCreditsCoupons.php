@@ -17,6 +17,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Class Handling ad credits.
+ *
+ * @class   AdCreditsCoupons
+ * @version 1.5.2
  */
 class AdCreditsCoupons {
 
@@ -75,7 +78,7 @@ class AdCreditsCoupons {
 	/**
 	 * Check if there is a valid coupon for the user currency.
 	 *
-	 * @return bool Wether there is a valid coupon for the merchant.
+	 * @return bool Whether there is a valid coupon for the merchant.
 	 */
 	public static function has_valid_coupon_for_merchant() {
 		return self::get_coupon_for_merchant() !== false;

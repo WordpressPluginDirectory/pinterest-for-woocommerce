@@ -21,6 +21,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Class Handling ad credits.
+ *
+ * @class   AdCredits
+ * @version 1.5.2
  */
 class AdCredits {
 
@@ -169,7 +172,7 @@ class AdCredits {
 	 *
 	 * @since 1.2.5
 	 *
-	 * @return bool Wether campaign is active or not.
+	 * @return bool Whether campaign is active or not.
 	 */
 	public static function check_if_ads_campaign_is_active() {
 
@@ -216,7 +219,7 @@ class AdCredits {
 	 *
 	 * @throws Exception API fetch error.
 	 *
-	 * @return bool Wether the campaign is active or not.
+	 * @return bool Whether the campaign is active or not.
 	 */
 	private static function get_is_campaign_active_from_recommendations() {
 		$request         = wp_remote_get( 'https://woocommerce.com/wp-json/wccom/marketing-tab/1.2/recommendations.json' );
@@ -271,12 +274,12 @@ class AdCredits {
 			if ( ! $discount['active'] ) {
 				continue;
 			}
-			if ( static::FUTURE_CREDIT === $discount['discount_type'] ) {
+			if ( self::FUTURE_CREDIT === $discount['discount_type'] ) {
 				$offer_code = $discount['discount_restrictions']['marketing_offer_code_hash'] ?? '';
 				if ( $offer_code === $coupon ) {
 					$found_discounts['future_discount'] = true;
 				}
-			} elseif ( static::MARKETING_OFFER_CREDIT === $discount['discount_type'] ) {
+			} elseif ( self::MARKETING_OFFER_CREDIT === $discount['discount_type'] ) {
 				$remaining_discount += (float) $discount['remaining_discount_in_micro_currency'] / 1000000;
 			}
 		}

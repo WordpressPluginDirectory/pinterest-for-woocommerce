@@ -25,6 +25,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Endpoint returning the current state of the XML feed.
+ *
+ * @class   FeedState
+ * @version 1.5.2
  */
 class FeedState extends VendorAPI {
 
@@ -108,7 +111,15 @@ class FeedState extends VendorAPI {
 			 * Returns feed state.
 			 * phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
 			 */
-			return apply_filters( 'pinterest_for_woocommerce_feed_state', array() );
+			$result = apply_filters( 'pinterest_for_woocommerce_feed_state', array() );
+			if ( is_array( $result ) && isset( $result['workflow'] ) && is_array( $result['workflow'] ) ) {
+				foreach ( $result['workflow'] as $key => $row ) {
+					if ( is_array( $row ) && isset( $row['extra_info'] ) ) {
+						$result['workflow'][ $key ]['extra_info'] = is_scalar( $row['extra_info'] ) ? wp_kses_post( (string) $row['extra_info'] ) : '';
+					}
+				}
+			}
+			return $result;
 
 		} catch ( \Throwable $th ) {
 
@@ -356,9 +367,9 @@ class FeedState extends VendorAPI {
 			);
 		} else {
 			$processing_status = $recent_feed_processing_results['status'] ?? '';
-			$status            = static::map_status_into_status( $processing_status );
-			$status_label      = static::map_status_into_label( $processing_status );
-			$extra_info        = static::map_status_into_extra_info( $recent_feed_processing_results );
+			$status            = self::map_status_into_status( $processing_status );
+			$status_label      = self::map_status_into_label( $processing_status );
+			$extra_info        = self::map_status_into_extra_info( $recent_feed_processing_results );
 		}
 		$result['overview'] = Pinterest\FeedStatusService::get_processing_result_overview_stats( $recent_feed_processing_results );
 
@@ -474,7 +485,7 @@ class FeedState extends VendorAPI {
 				$info = sprintf(
 					/* Translators: The status text returned by the API. */
 					esc_html__( 'Pinterest returned an unknown feed status: %1$s', 'pinterest-for-woocommerce' ),
-					$status ?? '<empty string>'
+					esc_html( $status )
 				);
 				$global_error = Pinterest\FeedStatusService::get_processing_results_global_error( $processing_results );
 				return $info . ( $global_error ? ' - ' . $global_error : '' );

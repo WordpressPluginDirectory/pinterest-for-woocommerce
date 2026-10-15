@@ -24,6 +24,9 @@ if ( ! class_exists( 'Pinterest_For_Woocommerce_Admin' ) ) :
 
 	/**
 	 * Class handling the settings page and onboarding Wizard registration and rendering.
+	 *
+	 * @class   Pinterest_For_Woocommerce_Admin
+	 * @version 1.5.2
 	 */
 	class Pinterest_For_Woocommerce_Admin {
 
@@ -44,7 +47,7 @@ if ( ! class_exists( 'Pinterest_For_Woocommerce_Admin' ) ) :
 
 		/**
 		 * Handle registration of all needed pages, depending on setup_complete status,
-		 * and wether we have the new WC nav enabled or not.
+		 * and whether we have the new WC nav enabled or not.
 		 *
 		 * @return void
 		 */
